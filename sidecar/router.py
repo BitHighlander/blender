@@ -10,6 +10,7 @@ from typing import Dict, Any, Callable
 from .errors import SidecarError, CommandError
 from .commands.ping import handle_ping
 from .commands.mesh import handle_create_cube, handle_create_room
+from .commands.dungeon import create_dungeon, animate_dungeon, get_dungeon_stats
 
 
 class CommandRouter:
@@ -24,6 +25,10 @@ class CommandRouter:
             "Ping": handle_ping,
             "CreateCube": handle_create_cube,
             "CreateRoom": handle_create_room,
+            # Dungeon builder commands 🏰
+            "CreateDungeon": create_dungeon,
+            "AnimateDungeon": animate_dungeon,
+            "GetDungeonStats": get_dungeon_stats,
         }
     
     def route(self, cmd: str, params: Dict[str, Any], opts: Dict[str, Any]) -> Dict[str, Any]:

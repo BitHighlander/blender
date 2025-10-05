@@ -1,0 +1,17 @@
+{
+  "name": "blender-degen-orchestrator",
+  "version": "2.0.0",
+  "description": "Degenerate Labs Blender Orchestrator - Test real-time dungeon building",
+  "type": "module",
+  "scripts": {
+    "test": "node test_dungeon.mjs",
+    "dungeon": "node test_dungeon.mjs",
+    "install-deps": "npm install"
+  },
+  "dependencies": {
+    "redis": "^4.7.0"
+  },
+  "author": "Degenerate Labs",
+  "license": "GPL-3.0"
+}
+
