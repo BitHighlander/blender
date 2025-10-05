@@ -35,19 +35,29 @@
 
 ---
 
-## ⏳ In Progress
+## ✅ WORKING NOW!
 
-### MCP Integration
-**Goal**: Run blender-mcp (proven MCP server) in your Blender build
+### MCP Integration ✨
+**Goal**: First-class MCP server built into Blender
 
-**Status**:
-- ✅ Addon copied to `scripts/addons/blender_mcp/`
-- ✅ Auto-start script created
-- ✅ Blender rebuilt with addon
-- ⏳ Testing if addon loads on startup
-- ⏳ Socket server (port 9876) not confirmed running yet
+**Status**: **COMPLETE AND WORKING!**
+- ✅ MCP socket server built into Blender core (not an addon!)
+- ✅ Auto-starts on Blender launch (`scripts/startup/bl_mcp_server.py`)
+- ✅ Socket server running on `localhost:9876`
+- ✅ Background threading (doesn't block Blender)
+- ✅ bpy.app.timers for safe command execution
+- ✅ **TESTED AND VERIFIED** with Node.js client!
 
-**Next Step**: Verify the addon actually loads when Blender starts
+**Test Results**:
+```bash
+node test_mcp_direct.mjs
+✅ Connected to Blender MCP server
+✅ Ping successful
+✅ Scene info retrieved
+✅ Cube created in Blender!
+```
+
+**This is TRUE first-class integration!**
 
 ---
 
