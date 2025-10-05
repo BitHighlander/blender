@@ -1,15 +1,16 @@
 {
   "name": "dungeon-orchestrator",
   "version": "1.0.0",
-  "description": "High-level orchestrator for procedural dungeon generation via Blender Redis Sidecar",
+  "description": "High-level orchestrator for procedural dungeon generation via Blender MCP",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
-    "test": "node src/examples/test-ping.js",
+    "test": "node src/examples/test-mcp.js",
     "test:cube": "node src/examples/test-cube.js",
     "test:dungeon": "node src/examples/test-dungeon-generation.js",
-    "generate": "node src/examples/test-dungeon-generation.js"
+    "generate": "node src/examples/test-dungeon-generation.js",
+    "test:mcp": "node src/examples/test-mcp.js"
   },
   "keywords": [
     "blender",
