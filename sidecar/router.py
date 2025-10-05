@@ -9,6 +9,7 @@ from typing import Dict, Any, Callable
 
 from .errors import SidecarError, CommandError
 from .commands.ping import handle_ping
+from .commands.mesh import handle_create_cube, handle_create_room
 
 
 class CommandRouter:
@@ -21,7 +22,8 @@ class CommandRouter:
         # Command registry: cmd_name -> handler_function
         self.handlers: Dict[str, Callable] = {
             "Ping": handle_ping,
-            # Additional commands will be registered here
+            "CreateCube": handle_create_cube,
+            "CreateRoom": handle_create_room,
         }
     
     def route(self, cmd: str, params: Dict[str, Any], opts: Dict[str, Any]) -> Dict[str, Any]:

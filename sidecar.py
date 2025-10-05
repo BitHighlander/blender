@@ -67,16 +67,24 @@ def main():
     # Initialize Redis consumer
     consumer = RedisConsumer(config, router)
     
-    # Start consuming commands
-    logger.info("🚀 Sidecar ready! Waiting for commands...")
+    # Start consuming commands (non-blocking, runs in background thread)
+    logger.info("🚀 Sidecar ready! Starting consumer...")
     logger.info(f"📬 Command stream: {config['redis']['cmd_stream']}")
     logger.info(f"📤 Reply stream: {config['redis']['reply_stream_default']}")
     logger.info(f"👤 Worker ID: {config['sidecar']['worker_id']}")
     logger.info("")
+    logger.info("✨ Using bpy.app.timers for real-time, non-blocking execution!")
+    logger.info("   Blender viewport will stay responsive.")
+    logger.info("")
     logger.info("Press Ctrl+C to stop gracefully.")
     
     try:
+        # Start background consumer thread
         consumer.run()
+        
+        # Keep main thread alive (but responsive) while consumer runs
+        consumer.wait_forever()
+        
     except KeyboardInterrupt:
         logger.info("\n🛑 Received interrupt signal, shutting down gracefully...")
         consumer.shutdown()
