@@ -72,10 +72,20 @@ See **[QUICKSTART.md](./QUICKSTART.md)** for detailed instructions.
 
 ## Documentation
 
+### Core Documentation
 - **[SPEC.md](./SPEC.md)** — Full specification (design principles, commands, schemas)
 - **[ROADMAP.md](./ROADMAP.md)** — Implementation roadmap with milestones
 - **[CONFIGURATION.md](./CONFIGURATION.md)** — Configuration guide (env vars, TOML, limits)
 - **[QUICKSTART.md](./QUICKSTART.md)** — Get started in 5 minutes
+
+### AI Integration (MCP)
+- **[MCP_INTEGRATION_ANALYSIS.md](./MCP_INTEGRATION_ANALYSIS.md)** — Full analysis of MCP integration approaches
+- **[MCP_QUICK_REFERENCE.md](./MCP_QUICK_REFERENCE.md)** — Code patterns and snippets for MCP implementation
+
+### Technical Deep Dives
+- **[THREADING.md](./THREADING.md)** — Threading model and safety
+- **[PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)** — Directory structure and conventions
+- **[IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md)** — Current implementation status
 
 ---
 

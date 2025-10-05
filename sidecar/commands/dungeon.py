@@ -49,13 +49,20 @@ def create_dungeon(config: Dict[str, Any], params: Dict[str, Any], opts: Dict[st
     dungeon_collection = bpy.data.collections.new(dungeon_name)
     bpy.context.scene.collection.children.link(dungeon_collection)
     
+    # Get context properly
+    scene = bpy.context.scene
+    view_layer = bpy.context.view_layer
+    
     # 1. Create floor
     bpy.ops.mesh.primitive_plane_add(size=grid_size * 2, location=(0, 0, 0))
-    floor = bpy.context.active_object
+    floor = view_layer.objects.active  # Use view_layer.objects.active instead
+    if not floor:  # Fallback if active object isn't set
+        floor = scene.objects[-1]  # Get last created object
     floor.name = "Dungeon_Floor"
     
     # Link to dungeon collection
-    bpy.context.scene.collection.objects.unlink(floor)
+    if floor.name in scene.collection.objects:
+        scene.collection.objects.unlink(floor)
     dungeon_collection.objects.link(floor)
     objects_created.append(floor.name)
     
@@ -68,12 +75,13 @@ def create_dungeon(config: Dict[str, Any], params: Dict[str, Any], opts: Dict[st
             size=1,
             location=(x, y, 0.5)
         )
-        room = bpy.context.active_object
+        room = view_layer.objects.active or scene.objects[-1]
         room.name = f"Room_{i}"
         room.scale = (width, height, 1)
         
         # Link to collection
-        bpy.context.scene.collection.objects.unlink(room)
+        if room.name in scene.collection.objects:
+            scene.collection.objects.unlink(room)
         dungeon_collection.objects.link(room)
         objects_created.append(room.name)
         
@@ -108,7 +116,7 @@ def create_dungeon(config: Dict[str, Any], params: Dict[str, Any], opts: Dict[st
             type='SPHERE',
             location=(spawn_room[0], spawn_room[1], 2)
         )
-        player_spawn = bpy.context.active_object
+        player_spawn = bpy.context.view_layer.objects.active or bpy.context.scene.objects[-1]
         player_spawn.name = "Player_Spawn"
         player_spawn.scale = (0.5, 0.5, 0.5)
         
@@ -121,7 +129,7 @@ def create_dungeon(config: Dict[str, Any], params: Dict[str, Any], opts: Dict[st
         location=(grid_size, grid_size, grid_size * 1.5),
         rotation=(math.radians(55), 0, math.radians(45))
     )
-    camera = bpy.context.active_object
+    camera = bpy.context.view_layer.objects.active or bpy.context.scene.objects[-1]
     camera.name = "Dungeon_Camera"
     bpy.context.scene.camera = camera
     
@@ -197,7 +205,7 @@ def _create_room_walls(
     
     for wall_dir, location, scale in wall_configs:
         bpy.ops.mesh.primitive_cube_add(size=1, location=location)
-        wall = bpy.context.active_object
+        wall = bpy.context.view_layer.objects.active or bpy.context.scene.objects[-1]
         wall.name = f"Wall_{wall_dir}_{int(x)}_{int(y)}"
         wall.scale = scale
         
@@ -209,7 +217,9 @@ def _create_room_walls(
         elif style == "fantasy":
             wall.color = (0.4, 0.3, 0.5, 1.0)  # Purple mystical
         
-        bpy.context.scene.collection.objects.unlink(wall)
+        # Move to dungeon collection (check if in scene collection first)
+        if wall.name in bpy.context.scene.collection.objects:
+            bpy.context.scene.collection.objects.unlink(wall)
         collection.objects.link(wall)
         walls.append(wall.name)
     
@@ -236,12 +246,14 @@ def _add_room_lights(
     
     for i, (lx, ly) in enumerate(corners):
         bpy.ops.object.light_add(type='POINT', location=(lx, ly, 2))
-        light = bpy.context.active_object
+        light = bpy.context.view_layer.objects.active or bpy.context.scene.objects[-1]
         light.name = f"Torch_{int(x)}_{int(y)}_{i}"
         light.data.energy = 50
         light.data.color = (1.0, 0.7, 0.3)  # Warm torch color
         
-        bpy.context.scene.collection.objects.unlink(light)
+        # Move to collection
+        if light.name in bpy.context.scene.collection.objects:
+            bpy.context.scene.collection.objects.unlink(light)
         collection.objects.link(light)
         lights.append(light.name)
     
@@ -272,13 +284,15 @@ def _create_corridors(rooms: List[Tuple[float, float, float, float]], collection
             size=1,
             location=(mid_x, mid_y, 0.5)
         )
-        corridor = bpy.context.active_object
+        corridor = bpy.context.view_layer.objects.active or bpy.context.scene.objects[-1]
         corridor.name = f"Corridor_{i}"
         corridor.scale = (distance / 2, 1, 1)
         corridor.rotation_euler = (0, 0, angle)
         corridor.color = (0.2, 0.2, 0.2, 1.0)
         
-        bpy.context.scene.collection.objects.unlink(corridor)
+        # Move to collection
+        if corridor.name in bpy.context.scene.collection.objects:
+            bpy.context.scene.collection.objects.unlink(corridor)
         collection.objects.link(corridor)
         corridors.append(corridor.name)
     
@@ -297,11 +311,13 @@ def _add_medieval_decorations(rooms: List[Tuple[float, float, float, float]], co
                 depth=3,
                 location=(x, y, 1.5)
             )
-            pillar = bpy.context.active_object
+            pillar = bpy.context.view_layer.objects.active or bpy.context.scene.objects[-1]
             pillar.name = f"Pillar_{i}"
             pillar.color = (0.4, 0.35, 0.3, 1.0)
             
-            bpy.context.scene.collection.objects.unlink(pillar)
+            # Move to collection
+            if pillar.name in bpy.context.scene.collection.objects:
+                bpy.context.scene.collection.objects.unlink(pillar)
             collection.objects.link(pillar)
             decorations.append(pillar.name)
     
@@ -319,12 +335,14 @@ def _add_scifi_decorations(rooms: List[Tuple[float, float, float, float]], colle
                 size=0.1,
                 location=(x + width/2 - 0.05, y, 2)
             )
-            panel = bpy.context.active_object
+            panel = bpy.context.view_layer.objects.active or bpy.context.scene.objects[-1]
             panel.name = f"TechPanel_{i}"
             panel.scale = (0.1, 1, 1)
             panel.color = (0.1, 0.3, 0.5, 1.0)  # Blue glow
             
-            bpy.context.scene.collection.objects.unlink(panel)
+            # Move to collection
+            if panel.name in bpy.context.scene.collection.objects:
+                bpy.context.scene.collection.objects.unlink(panel)
             collection.objects.link(panel)
             decorations.append(panel.name)
     
@@ -344,12 +362,14 @@ def _add_fantasy_decorations(rooms: List[Tuple[float, float, float, float]], col
                          y + random.uniform(-height/3, height/3), 
                          1)
             )
-            crystal = bpy.context.active_object
+            crystal = bpy.context.view_layer.objects.active or bpy.context.scene.objects[-1]
             crystal.name = f"Crystal_{i}"
             crystal.scale = (0.5, 0.5, 1.5)  # Tall crystal
             crystal.color = (0.5, 0.2, 0.8, 1.0)  # Purple magic
             
-            bpy.context.scene.collection.objects.unlink(crystal)
+            # Move to collection
+            if crystal.name in bpy.context.scene.collection.objects:
+                bpy.context.scene.collection.objects.unlink(crystal)
             collection.objects.link(crystal)
             decorations.append(crystal.name)
     

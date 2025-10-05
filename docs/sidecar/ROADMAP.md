@@ -140,6 +140,133 @@ ExportGLTF(filepath="/tmp/gn_test.glb", selection=["base_mesh"])
 
 ---
 
+## Milestone 2.5: MCP Integration (AI Integration)
+
+**Goal:** Add Model Context Protocol (MCP) support for AI agent control of Blender.
+
+**Reference:** See [MCP_INTEGRATION_ANALYSIS.md](./MCP_INTEGRATION_ANALYSIS.md) for full analysis and [MCP_QUICK_REFERENCE.md](./MCP_QUICK_REFERENCE.md) for code patterns.
+
+### Background
+
+Integrate MCP server into sidecar to enable direct control from AI assistants (Claude, Cursor, etc.) without external socket server. This provides a first-class, low-latency integration superior to plugin-based approaches.
+
+**Inspiration:**
+- [blender-mcp](https://github.com/ahujasid/blender-mcp) - External MCP server with addon (13.7k stars)
+- [blendify](https://github.com/ptrvilya/blendify) - High-level Blender API for CV/ML (academic use)
+
+### Phase 2.5A: MCP Server Foundation
+
+**Tasks:**
+- [ ] Add FastMCP dependency to `requirements.txt`
+- [ ] Create `sidecar/mcp_server.py` with singleton pattern
+- [ ] Implement thread bridge using `bpy.app.timers.register()`
+- [ ] Add safe exit handler (prevent Blender memory leak detection hang)
+- [ ] Create stdout capture utilities
+- [ ] Test: Basic MCP server starts and responds to ping
+
+**Key Patterns:**
+```python
+# Thread-safe execution (critical!)
+bpy.app.timers.register(callback, first_interval=0.0)
+
+# Singleton server
+class MCPServer(metaclass=Singleton): pass
+
+# Safe exit decorator
+@safe_exit
+def render(): pass
+```
+
+### Phase 2.5B: High-Level Semantic API
+
+**Tasks:**
+- [ ] Create `sidecar/api/` module structure
+- [ ] Implement `Scene` class with singleton pattern (blendify-style)
+- [ ] Implement `RenderablesCollection` class
+- [ ] Implement `LightsCollection` class
+- [ ] Add collections pattern for clean API
+- [ ] Test: High-level API creates objects correctly
+
+**Reference Code:**
+- blendify: `scene.py` (Scene class)
+- blendify: `renderables/primitives.py` (primitives)
+- blendify: `renderables/collection.py` (collections)
+
+### Phase 2.5C: MCP Tools
+
+**Tasks:**
+- [ ] `get_capabilities` - Return available features
+- [ ] `get_scene_info` - Inspect current scene
+- [ ] `create_cube` - Basic mesh creation
+- [ ] `create_sphere` - Basic sphere creation
+- [ ] `clear_scene` - Reset scene
+- [ ] `add_light` - Add point light
+- [ ] Test: All tools callable from MCP client
+
+**Reference Code:**
+- blender-mcp: `server.py:244-525` (tool definitions)
+
+### Phase 2.5D: Dungeon-Specific Tools
+
+**Tasks:**
+- [ ] `create_dungeon_room` - Create rectangular room
+- [ ] `create_dungeon_corridor` - Create corridor between rooms
+- [ ] `apply_dungeon_material` - Apply PBR materials
+- [ ] `export_dungeon_scene` - Export to GLB
+- [ ] Test: Create simple dungeon via MCP commands
+
+### Phase 2.5E: Integration Testing
+
+**Tasks:**
+- [ ] Test with Claude Desktop
+- [ ] Test with Cursor
+- [ ] Benchmark latency (compare to socket approach)
+- [ ] Document AI usage patterns
+- [ ] Create example prompts
+- [ ] Add to CI pipeline
+
+### Success Criteria
+
+Complete this flow from AI assistant:
+
+```
+User: "Create a simple dungeon scene with a 10x10 room, add a sphere in the center, add lighting, and export it"
+
+AI Assistant: [Uses MCP tools]
+1. get_capabilities() -> Check what's available
+2. clear_scene() -> Start fresh
+3. create_dungeon_room(width=10, depth=10, height=3, name="MainRoom")
+4. create_sphere(radius=1, x=0, y=0, z=1.5, name="Orb")
+5. add_light(type="point", strength=1000, x=0, y=0, z=5)
+6. export_dungeon_scene(filepath="/tmp/dungeon.glb")
+```
+
+**Deliverables:**
+- `sidecar/mcp_server.py` - Main MCP server
+- `sidecar/mcp/tools.py` - MCP tool definitions
+- `sidecar/mcp/decorators.py` - safe_exit, thread_safe
+- `sidecar/api/scene.py` - High-level Scene API
+- `sidecar/api/renderables.py` - Renderables collection
+- `sidecar/api/dungeon.py` - Dungeon-specific operations
+- `sidecar/internal/singleton.py` - Singleton metaclass
+- `sidecar/internal/threading.py` - Thread bridge utilities
+- `tests/test_mcp_tools.py` - MCP tool tests
+- `docs/sidecar/MCP_USAGE.md` - User guide
+
+**Estimated Time:** 5-7 days
+
+**Dependencies:**
+- Milestone 1 (Core Commands) should be complete or in progress
+- Can be developed in parallel with Milestone 2 (Geometry Nodes)
+
+**Notes:**
+- This provides AI-native interface to Blender
+- Zero socket overhead (in-process communication)
+- Can coexist with Redis command interface
+- Priority can be adjusted based on project needs
+
+---
+
 ## Milestone 3: Observability & Error Handling
 
 **Goal:** Production-ready logging, metrics, and error propagation.
@@ -356,6 +483,7 @@ python tests/send_ping.py
 - [ ] Milestone 0: Hello World (Foundation)
 - [ ] Milestone 1: Core Commands (Vertical Slice)
 - [ ] Milestone 2: Geometry Nodes Integration
+- [ ] Milestone 2.5: MCP Integration (AI Integration) ⚡
 - [ ] Milestone 3: Observability & Error Handling
 - [ ] Milestone 4: Performance & Batching
 - [ ] Milestone 5: Full Command Set

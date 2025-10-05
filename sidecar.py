@@ -5,8 +5,8 @@ Blender Python Sidecar - Redis Bridge
 Main entry point for the Blender sidecar service.
 Run with: blender -b --python sidecar.py
 
-Author: Generated
-Version: 1.0.0-dev
+Author: Degenerate Labs
+Version: 2.0.0-realtime (Real-time threading with bpy.app.timers!)
 """
 
 import sys
@@ -67,14 +67,11 @@ def main():
     # Initialize Redis consumer
     consumer = RedisConsumer(config, router)
     
-    # Start consuming commands (non-blocking, runs in background thread)
-    logger.info("🚀 Sidecar ready! Starting consumer...")
+    # Start consuming commands
+    logger.info("🚀 Sidecar ready! Waiting for commands...")
     logger.info(f"📬 Command stream: {config['redis']['cmd_stream']}")
     logger.info(f"📤 Reply stream: {config['redis']['reply_stream_default']}")
     logger.info(f"👤 Worker ID: {config['sidecar']['worker_id']}")
-    logger.info("")
-    logger.info("✨ Using bpy.app.timers for real-time, non-blocking execution!")
-    logger.info("   Blender viewport will stay responsive.")
     logger.info("")
     logger.info("Press Ctrl+C to stop gracefully.")
     

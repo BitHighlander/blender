@@ -65,3 +65,4 @@ dump.rdb
 .coverage
 htmlcov/
 .analysis/
+node_modules/

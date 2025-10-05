@@ -2,7 +2,6 @@
 Redis Streams consumer for the sidecar.
 
 Consumes commands from Redis Streams, routes them, and sends responses.
-Uses threading + bpy.app.timers for non-blocking, real-time execution.
 """
 
 import json
@@ -10,15 +9,7 @@ import logging
 import time
 import uuid
 import traceback
-import threading
 from typing import Dict, Any, Optional
-
-try:
-    import bpy
-    HAS_BPY = True
-except ImportError:
-    HAS_BPY = False
-    bpy = None
 
 try:
     import redis
@@ -33,7 +24,7 @@ from .telemetry import Metrics, create_response
 
 
 class RedisConsumer:
-    """Consumes commands from Redis Streams with non-blocking execution."""
+    """Consumes commands from Redis Streams."""
     
     def __init__(self, config: Dict[str, Any], router: CommandRouter):
         self.config = config
@@ -42,9 +33,6 @@ class RedisConsumer:
         
         if not HAS_REDIS:
             raise RuntimeError("redis-py not installed. Install with: pip install redis")
-        
-        if not HAS_BPY:
-            raise RuntimeError("bpy not available. Must run inside Blender.")
         
         # Initialize Redis connection
         redis_url = config["redis"]["url"]
@@ -65,7 +53,6 @@ class RedisConsumer:
         self.consumer_name = config["redis"]["consumer_name"]
         
         self.running = False
-        self.consumer_thread = None
         
         # Ensure consumer group exists
         self._ensure_consumer_group()
@@ -89,28 +76,9 @@ class RedisConsumer:
                 raise
     
     def run(self) -> None:
-        """Start consumer in background thread for non-blocking operation."""
-        if self.running:
-            self.logger.warning("Consumer is already running")
-            return
-        
+        """Main consumer loop."""
         self.running = True
-        self.logger.info(f"👂 Starting background consumer thread...")
-        
-        # Start consumer thread
-        self.consumer_thread = threading.Thread(
-            target=self._consumer_loop,
-            name="RedisConsumer",
-            daemon=True,  # Daemon thread won't block Blender exit
-        )
-        self.consumer_thread.start()
-        
-        self.logger.info(f"✅ Consumer thread started, listening on {self.cmd_stream}")
-        self.logger.info("   Blender viewport will remain responsive!")
-    
-    def _consumer_loop(self) -> None:
-        """Background thread: Polls Redis and queues commands for main thread."""
-        self.logger.info("Consumer thread running...")
+        self.logger.info(f"👂 Listening for commands on {self.cmd_stream}...")
         
         while self.running:
             try:
@@ -127,41 +95,21 @@ class RedisConsumer:
                     # No messages, continue
                     continue
                 
-                # Process each message (queues execution via bpy.app.timers)
+                # Process each message
                 for stream_name, message_list in messages:
                     for message_id, message_data in message_list:
-                        self._queue_message_for_execution(message_id, message_data)
+                        self._process_message(message_id, message_data)
                 
             except KeyboardInterrupt:
-                self.logger.info("Received interrupt in consumer thread...")
+                self.logger.info("Received interrupt, stopping...")
                 self.running = False
                 break
             except Exception as e:
-                if self.running:  # Only log if not shutting down
-                    self.logger.error(f"Error in consumer loop: {e}", exc_info=True)
-                    time.sleep(1)  # Back off on error
-        
-        self.logger.info("Consumer thread stopped")
-    
-    def _queue_message_for_execution(self, message_id: str, message_data: Dict[str, str]) -> None:
-        """Queue message execution in Blender's main thread using bpy.app.timers."""
-        
-        def execute_in_main_thread():
-            """Wrapper that executes in Blender's main thread."""
-            try:
-                self._process_message(message_id, message_data)
-            except Exception as e:
-                self.logger.error(f"Error executing message {message_id}: {e}", exc_info=True)
-            # Return None to prevent timer from re-running
-            return None
-        
-        # Schedule execution in main thread immediately
-        # first_interval=0.0 means "run as soon as possible"
-        bpy.app.timers.register(execute_in_main_thread, first_interval=0.0)
-        self.logger.debug(f"📥 Queued message {message_id} for main thread execution")
+                self.logger.error(f"Error in consumer loop: {e}", exc_info=True)
+                time.sleep(1)  # Back off on error
     
     def _process_message(self, message_id: str, message_data: Dict[str, str]) -> None:
-        """Process message in Blender's main thread (called via bpy.app.timers)."""
+        """Process a single message from the stream."""
         try:
             # Parse payload
             payload_str = message_data.get("payload", "{}")
@@ -281,11 +229,11 @@ class RedisConsumer:
         This keeps Blender running and responsive. The consumer thread
         handles Redis messages and queues them via bpy.app.timers.
         """
-        self.logger.info("Main thread entering wait loop (Ctrl+C to stop)...")
+        self.logger.info("Main thread waiting (consumer runs in background)...")
         try:
-            while self.running:
-                time.sleep(0.1)  # Short sleep, Blender UI stays responsive
+            while self.running and self.consumer_thread and self.consumer_thread.is_alive():
+                time.sleep(0.1)  # Short sleep, Blender stays responsive
         except KeyboardInterrupt:
-            self.logger.info("Interrupt received in main thread")
+            self.logger.info("Interrupt received")
             self.shutdown()
 

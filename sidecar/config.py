@@ -44,7 +44,7 @@ def get_default_config() -> Dict[str, Any]:
         "sidecar": {
             "worker_id": hostname,
             "log_level": "DEBUG",
-            "version": "1.0.0-dev",
+            "version": "2.0.0-realtime",  # Real-time threading with bpy.app.timers!
         },
         "paths": {
             "assets_root": "./assets",

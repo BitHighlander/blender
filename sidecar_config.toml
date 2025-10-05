@@ -14,7 +14,7 @@ consumer_name = "worker-01"
 [sidecar]
 worker_id = "worker-dev-01"
 log_level = "DEBUG"
-version = "1.0.0-dev"
+version = "2.0.0-realtime"
 
 [paths]
 assets_root = "./assets"
