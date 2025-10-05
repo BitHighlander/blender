@@ -9,7 +9,7 @@ from typing import Dict, Any, Callable
 
 from .errors import SidecarError, CommandError
 from .commands.ping import handle_ping
-from .commands.mesh import handle_create_cube, handle_create_room
+from .commands.mesh import handle_create_cube, handle_create_room, handle_get_scene_info
 from .commands.dungeon_simple import create_simple_dungeon
 
 
@@ -22,8 +22,11 @@ class CommandRouter:
         
         # Command registry: cmd_name -> handler_function
         self.handlers: Dict[str, Callable] = {
+            # Core commands (MCP parity)
             "Ping": handle_ping,
+            "GetSceneInfo": handle_get_scene_info,
             "CreateCube": handle_create_cube,
+            # Extended commands
             "CreateRoom": handle_create_room,
             # Simple dungeon that just works! 🏰
             "CreateDungeon": create_simple_dungeon,

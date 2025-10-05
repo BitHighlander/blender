@@ -61,6 +61,29 @@ def handle_create_cube(config: Dict[str, Any], params: Dict[str, Any], opts: Dic
     }
 
 
+def handle_get_scene_info(config: Dict[str, Any], params: Dict[str, Any], opts: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Handle GetSceneInfo command.
+    
+    Returns information about the current Blender scene.
+    Matches the MCP 'get_scene_info' command.
+    
+    Args:
+        config: Sidecar configuration
+        params: Command parameters (none required)
+        opts: Command options
+    
+    Returns:
+        Result dictionary with scene statistics
+    """
+    return {
+        "objects": len(bpy.data.objects),
+        "meshes": len(bpy.data.meshes),
+        "lights": len(bpy.data.lights),
+        "cameras": len(bpy.data.cameras),
+    }
+
+
 def handle_create_room(config: Dict[str, Any], params: Dict[str, Any], opts: Dict[str, Any]) -> Dict[str, Any]:
     """
     Handle CreateRoom command.
