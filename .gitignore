@@ -65,4 +65,9 @@ dump.rdb
 .coverage
 htmlcov/
 .analysis/
+
+# Node.js (from test files and orchestrator)
 node_modules/
+
+# Orchestrator is part of the repo but ignored by CMake
+# (It's a separate Node.js project for dungeon generation)

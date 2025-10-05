@@ -1,0 +1,28 @@
+{
+  "name": "dungeon-orchestrator",
+  "version": "1.0.0",
+  "description": "High-level orchestrator for procedural dungeon generation via Blender Redis Sidecar",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node src/examples/test-ping.js",
+    "test:cube": "node src/examples/test-cube.js",
+    "test:dungeon": "node src/examples/test-dungeon-generation.js",
+    "generate": "node src/examples/test-dungeon-generation.js"
+  },
+  "keywords": [
+    "blender",
+    "procedural",
+    "dungeon",
+    "worldgen",
+    "redis"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ioredis": "^5.3.2",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {}
+}
