@@ -5,7 +5,7 @@ A minimal Python sidecar that runs inside headless Blender and exposes
 a stable, efficient command API over Redis Streams.
 """
 
-__version__ = "1.0.0-dev"
+__version__ = "2.0.0-realtime"  # Real-time threading with bpy.app.timers!
 __author__ = "Generated"
 
 from .config import load_config
