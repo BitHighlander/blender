@@ -1,0 +1,52 @@
+# Blender Sidecar Configuration
+# This file provides an alternative to environment variables
+
+[redis]
+url = "redis://localhost:6379/0"
+cmd_stream = "blender:cmd"
+reply_stream_default = "blender:reply"
+events_stream = "blender:events"
+metrics_stream = "blender:metrics"
+health_key_prefix = "blender:health"
+consumer_group = "cg:dev"
+consumer_name = "worker-01"
+
+[sidecar]
+worker_id = "worker-dev-01"
+log_level = "DEBUG"
+version = "1.0.0-dev"
+
+[paths]
+assets_root = "./assets"
+build_root = "./build"
+tmp_root = "./tmp"
+
+# Security: Path allowlists (read/write permissions)
+allowed_read_paths = [
+    "./assets",
+    "./build",
+]
+allowed_write_paths = [
+    "./build",
+    "./tmp",
+]
+
+[features]
+use_zstd = false              # Compression (requires zstandard package)
+use_msgpack = false           # MessagePack encoding (requires msgpack package)
+allow_ops_fallback = true     # Allow UI operators in headless mode (dev only)
+enable_profiling = true       # Detailed per-phase timing
+enable_tracing = true         # Trace/span ID correlation
+
+[limits]
+max_objects = 10000           # Maximum objects per scene
+max_glb_mb = 100              # Maximum GLB export size (MB)
+cmd_timeout_ms = 60000        # Command timeout (60 seconds)
+heartbeat_interval_sec = 10   # Health heartbeat interval
+max_batch_ops = 100           # Maximum operations in a Batch command
+
+[blender]
+disable_undo = true           # Disable global undo during operations
+startup_blend = ""            # Optional: path to startup .blend file
+temp_blend_prefix = "sidecar_"
+
